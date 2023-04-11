@@ -24,7 +24,12 @@ port = args.port
 print("\n\tSamba 3.0.20 < 3.0.25rc3 - 'Username' map script' Command Execution\n")
 
 # get adapter ip and open port
-local_ip = ni.ifaddresses(adapter)[ni.AF_INET][0]['addr']
+# get ip from adapter
+try:
+    local_ip = ni.ifaddresses(adapter)[ni.AF_INET][0]['addr']
+except ValueError:
+    print("Check Adapter: {0}".format(adapter))
+    sys.exit(1)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(("127.0.0.1",0))
 s.listen(1)
